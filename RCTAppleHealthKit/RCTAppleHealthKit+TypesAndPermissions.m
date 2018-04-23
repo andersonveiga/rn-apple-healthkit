@@ -14,7 +14,7 @@
 #pragma mark - HealthKit Permissions
 
 - (NSDictionary *)readPermsDict {
-    NSDictionary *readPerms = @{
+    NSMutableDictionary *readPerms = [NSMutableDictionary dictionaryWithDictionary:@{
         // Characteristic Identifiers
         @"DateOfBirth" : [HKObjectType characteristicTypeForIdentifier:HKCharacteristicTypeIdentifierDateOfBirth],
         @"BiologicalSex" : [HKObjectType characteristicTypeForIdentifier:HKCharacteristicTypeIdentifierBiologicalSex],
@@ -47,15 +47,17 @@
         @"BloodGlucose" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodGlucose],
         // Sleep
         @"SleepAnalysis" : [HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierSleepAnalysis],
-        // Mindfulness
-        @"MindfulSession" : [HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierMindfulSession],
-    };
+    }];
+    // Mindfulness
+    if(@available(iOS 10, *)) {
+        [readPerms setObject:[HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierMindfulSession] forKey:@"MindfulSession"];
+    }
     return readPerms;
 }
 
 
 - (NSDictionary *)writePermsDict {
-    NSDictionary *writePerms = @{
+    NSMutableDictionary *writePerms = [NSMutableDictionary dictionaryWithDictionary:@{
         // Body Measurements
         @"Height" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight],
         @"Weight" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass],
@@ -112,9 +114,11 @@
         @"Water" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDietaryWater],
         // Sleep
         @"SleepAnalysis" : [HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierSleepAnalysis],
-        // Mindfulness
-        @"MindfulSession" : [HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierMindfulSession],
-    };
+    }];
+    // Mindfulness
+    if(@available(iOS 10, *)) {
+        [writePerms setObject:[HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierMindfulSession] forKey:@"MindfulSession"];
+    }
     return writePerms;
 }
 
