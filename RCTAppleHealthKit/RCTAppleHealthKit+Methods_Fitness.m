@@ -110,33 +110,46 @@
 
 - (void)fitness_initializeStepEventObserver:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
-    HKSampleType *sampleType =
-    [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
+    HKQuantityType *quantityType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
 
-    HKObserverQuery *query =
-    [[HKObserverQuery alloc]
-     initWithSampleType:sampleType
-     predicate:nil
-     updateHandler:^(HKObserverQuery *query,
-                     HKObserverQueryCompletionHandler completionHandler,
-                     NSError *error) {
-
-         if (error) {
-             // Perform Proper Error Handling Here...
-             NSLog(@"*** An error occured while setting up the stepCount observer. %@ ***", error.localizedDescription);
-             callback(@[RCTMakeError(@"An error occured while setting up the stepCount observer", error, nil)]);
-             return;
+    [self.healthStore
+     enableBackgroundDeliveryForType: quantityType
+     frequency: HKUpdateFrequencyImmediate
+     withCompletion:^(BOOL success, NSError *error)
+     {
+         if (success)
+         {
+             NSLog(@"enableBackgroundDeliveryForType success");
+             
+             HKSampleType *sampleType =
+             [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
+             
+             HKObserverQuery *query =
+             [[HKObserverQuery alloc]
+              initWithSampleType:sampleType
+              predicate:nil
+              updateHandler:^(HKObserverQuery *query,
+                              HKObserverQueryCompletionHandler completionHandler,
+                              NSError *error) {
+                  
+                  if (error) {
+                      // Perform Proper Error Handling Here...
+                      NSLog(@"*** An error occured while setting up the stepCount observer. %@ ***", error.localizedDescription);
+                      callback(@[RCTMakeError(@"An error occured while setting up the stepCount observer", error, nil)]);
+                      return;
+                  }
+                  
+                  [self.bridge.eventDispatcher sendAppEventWithName:@"change:steps"
+                                                               body:@{@"name": @"change:steps"}];
+                  
+                  // If you have subscribed for background updates you must call the completion handler here.
+                  completionHandler();
+                  
+              }];
+             
+             [self.healthStore executeQuery:query];
          }
-
-          [self.bridge.eventDispatcher sendAppEventWithName:@"change:steps"
-                                                       body:@{@"name": @"change:steps"}];
-
-         // If you have subscribed for background updates you must call the completion handler here.
-         // completionHandler();
-
      }];
-
-    [self.healthStore executeQuery:query];
 }
 
 
