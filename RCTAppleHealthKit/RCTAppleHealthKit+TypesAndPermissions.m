@@ -3,7 +3,8 @@
 //  RCTAppleHealthKit
 //
 //  Created by Greg Wilson on 2016-06-26.
-//  Copyright © 2016 Greg Wilson. All rights reserved.
+//  This source code is licensed under the MIT-style license found in the
+//  LICENSE file in the root directory of this source tree.
 //
 
 #import "RCTAppleHealthKit+TypesAndPermissions.h"
@@ -14,7 +15,7 @@
 #pragma mark - HealthKit Permissions
 
 - (NSDictionary *)readPermsDict {
-    NSMutableDictionary *readPerms = [NSMutableDictionary dictionaryWithDictionary:@{
+    NSDictionary *readPerms = @{
         // Characteristic Identifiers
         @"DateOfBirth" : [HKObjectType characteristicTypeForIdentifier:HKCharacteristicTypeIdentifierDateOfBirth],
         @"BiologicalSex" : [HKObjectType characteristicTypeForIdentifier:HKCharacteristicTypeIdentifierBiologicalSex],
@@ -30,6 +31,7 @@
         @"StepCount" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount],
         @"DistanceWalkingRunning" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceWalkingRunning],
         @"DistanceCycling" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceCycling],
+        @"DistanceSwimming" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceSwimming],
         @"BasalEnergyBurned" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBasalEnergyBurned],
         @"ActiveEnergyBurned" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned],
         @"FlightsClimbed" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierFlightsClimbed],
@@ -47,17 +49,17 @@
         @"BloodGlucose" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodGlucose],
         // Sleep
         @"SleepAnalysis" : [HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierSleepAnalysis],
-    }];
-    // Mindfulness
-    if(@available(iOS 10, *)) {
-        [readPerms setObject:[HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierMindfulSession] forKey:@"MindfulSession"];
-    }
+        // Mindfulness
+        @"MindfulSession" : [HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierMindfulSession],
+        //workouts
+        @"Workout" : [HKObjectType workoutType],
+    };
     return readPerms;
 }
 
 
 - (NSDictionary *)writePermsDict {
-    NSMutableDictionary *writePerms = [NSMutableDictionary dictionaryWithDictionary:@{
+    NSDictionary *writePerms = @{
         // Body Measurements
         @"Height" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight],
         @"Weight" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass],
@@ -114,14 +116,11 @@
         @"Water" : [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDietaryWater],
         // Sleep
         @"SleepAnalysis" : [HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierSleepAnalysis],
-    }];
-    // Mindfulness
-    if(@available(iOS 10, *)) {
-        [writePerms setObject:[HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierMindfulSession] forKey:@"MindfulSession"];
-    }
+        // Mindfulness
+        @"MindfulSession" : [HKObjectType categoryTypeForIdentifier:HKCategoryTypeIdentifierMindfulSession],
+    };
     return writePerms;
 }
-
 
 // Returns HealthKit read permissions from options array
 - (NSSet *)getReadPermsFromOptions:(NSArray *)options {
@@ -152,6 +151,20 @@
         }
     }
     return writePermSet;
+}
+
+- (HKObjectType *)getWritePermFromString:(NSString *)writePerm {
+    return [[self writePermsDict] objectForKey:writePerm];
+}
+- (NSString *)getAuthorizationStatusString:(HKAuthorizationStatus)status {
+    switch (status) {
+        case HKAuthorizationStatusNotDetermined:
+            return @"NotDetermined";
+        case HKAuthorizationStatusSharingDenied:
+            return @"SharingDenied";
+        case HKAuthorizationStatusSharingAuthorized:
+            return @"SharingAuthorized";
+    }
 }
 
 @end
