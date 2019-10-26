@@ -182,15 +182,21 @@
     }];
    
     HKQuantityType *quantityType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
-    [self.healthStore enableBackgroundDeliveryForType: quantityType frequency: HKUpdateFrequencyImmediate
-     withCompletion:^(BOOL success, NSError *error)
-    {
-        NSLog(@"fitness_initializeStepEventObserver completion. Success: %s, Error: %@", success ? "true" : "false", [error localizedDescription]);
+    
+    [self.healthStore disableBackgroundDeliveryForType: quantityType withCompletion:^(BOOL success, NSError * _Nullable error) {
+        
+        NSLog(@"disableBackgroundDeliveryForType completion. Success: %s, Error: %@", success ? "true" : "false", [error localizedDescription]);
+        
+        [self.healthStore enableBackgroundDeliveryForType: quantityType frequency: HKUpdateFrequencyImmediate
+         withCompletion:^(BOOL success, NSError *error)
+        {
+            NSLog(@"enableBackgroundDeliveryForType completion. Success: %s, Error: %@", success ? "true" : "false", [error localizedDescription]);
 
-        if (success) {
-          NSLog(@"fitness_initializeStepEventObserver executing query.");
-          [self.healthStore executeQuery:query];
-        }
+            if (success) {
+              NSLog(@"fitness_initializeStepEventObserver executing query.");
+              [self.healthStore executeQuery:query];
+            }
+        }];
     }];
 }
 
